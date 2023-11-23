@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        select {
+            width: 55px;
+        }
+
+        h1 {
+            font-family: 'Courier New', Courier, monospace;
+            margin-bottom: 30px;
+        }
+
+        div {
+            border: solid black 1px;
+            display: block;
+            width: fit-content;
+            margin: auto;
+            margin-top: 20px;
+            width: 70%;
+            text-align: center;
+        }
+
+        button {
+            display: block;
+            width: 120px;
+            height: 40px;
+            margin: auto;
+            margin-top: 10px;
+            font-size: large;
+        }
+
+        #con_btn {
+            padding: 5px;
+            width: 50%;
+        }
+
+        #years {
+            display: flex;
+        }
+
+        #det_result {
+            border: solid black 1px;
+            height: 15px;
+        }
+
+        #det_btn,
+        #defBtn {
+            margin-top: 20px;
+            width: 300px;
+            height: 40px;
+        }
+
+        #def_result,
+        #def_result2 {
+            border: solid black 1px;
+            height: 20px;
+            width: 100%;
+        }
+    </style>
+    <script>
+        ip = '127.0.0.1'
+        port = 8000
+        path = `http://${ip}:${port}`
+        function defYear() {
+            var selectAnio = document.getElementById("selectAnio");
+            var selectedAnio = selectAnio.value;
+            fetch(path + `/defunciones/${selectedAnio}`)
+                .then(response => response.json())
+                .then(data => {
+                    values = JSON.parse(data)
+                    document.getElementById("def_result").innerHTML = `
+                       ${values.genero_mas} tienen un ${Math.abs(values.porcentaje).toFixed(2)}% más de defunciones que ${values.genero_menos} en el año ${selectedAnio}.
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+
+        function getCon() {
+            fetch(path + '/condenados/result')
+                .then(response => response.json())
+                .then(data => {
+                    values = JSON.parse(data)
+                    document.getElementById("con_result").innerHTML = `
+                    Año: ${values.anyo} Condenados: ${values.valor}
+                    `;
+                }
+                )
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+
+        function condenados() {
+            fetch("/condenados", {
+                method: "GET"
+            })
+                .then(response => response.text())
+                .then(data => {
+                    const contentDiv = document.getElementById("content");
+                    contentDiv.innerHTML = data;
+                })
+                .catch(error => {
+                    console.error("Error al hacer la petición:", error);
+                });
+        }
+
+
+        function defunciones() {
+            fetch("/defunciones", {
+                method: "GET"
+            })
+                .then(response => response.text())
+                .then(data => {
+                    const contentDiv = document.getElementById("content");
+                    contentDiv.innerHTML = data;
+                })
+                .catch(error => {
+                    console.error("Error al hacer la petición:", error);
+                });
+        }
+
+        function getDef() {
+            fetch(path + "/masdefunciones", {
+                method: "GET"
+            })
+                .then(response => response.json())
+                .then(data => {
+                    values = JSON.parse(data)
+                    document.getElementById("def_result2").innerHTML = `
+                    Año ${values.anyo} género ${values.genero} defunciones ${values.valor}
+                    `;
+                })
+                .catch(error => {
+                    console.error("Error al hacer la petición:", error);
+                });
+        }
+
+        function generarOptions() {
+            var select = document.getElementById("selectAnio");
+
+            for (var i = 1980; i <= 2022; i++) {
+                var option = document.createElement("option");
+                option.value = i;
+                option.text = i;
+                select.appendChild(option);
+            }
+        }
+
+        function options() {
+            setTimeout(function() {
+                generarOptions();
+            }, 200);
+        }
+    </script>
+</head>
+
+<body>
+    <div>
+        <h1>Qué deseas consultar?</h1>
+        <button onclick="condenados()">Condenados</button>
+        <button onclick="defunciones(), options()">Defunciones</button>
+    </div>
+    <div id="content"></div>
+</body>
+
+</html>
